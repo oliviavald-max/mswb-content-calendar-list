@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MSWB Calendar View — May 2026–May 2027</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f9fa;padding:1.5rem;color:#212529}
+.cal-wrap{max-width:1300px;margin:0 auto}
+h2{font-size:17px;font-weight:500;color:#212529}
+.subtitle{font-size:13px;color:#6c757d;margin-top:3px;margin-bottom:1.25rem}
+.month-pills{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:1rem}
+.mpill{font-size:11px;padding:4px 10px;border-radius:20px;border:0.5px solid #dee2e6;background:#fff;color:#6c757d;cursor:pointer;white-space:nowrap;transition:all .15s}
+.mpill:hover{background:#f1f3f5}
+.mpill.active{background:#212529;color:#fff;border-color:#212529}
+.nav-row{display:flex;align-items:center;gap:10px;margin-bottom:.5rem}
+.nav-btn{font-size:12px;padding:5px 14px;border-radius:6px;border:0.5px solid #ced4da;background:#fff;color:#212529;cursor:pointer;font-weight:500;transition:background .15s}
+.nav-btn:hover{background:#f1f3f5}
+.month-title{font-size:20px;font-weight:500;color:#212529;flex:1;text-align:center}
+.month-theme{font-size:12px;color:#6c757d;text-align:center;font-style:italic;margin-bottom:.6rem}
+.events-bar{font-size:11px;color:#495057;background:#fff;border:0.5px solid #e9ecef;border-radius:6px;padding:6px 12px;margin-bottom:1rem;line-height:1.6}
+.events-bar strong{color:#212529;font-weight:500}
+.controls{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:.85rem}
+.filter-btn{font-size:11px;padding:4px 10px;border-radius:6px;border:0.5px solid #ced4da;background:#fff;color:#6c757d;cursor:pointer;transition:all .15s}
+.filter-btn:hover{background:#f1f3f5}
+.filter-btn.active{color:#212529;font-weight:500;background:#f1f3f5;border-color:#adb5bd}
+.legend{display:flex;flex-wrap:wrap;gap:5px 14px;margin-bottom:.85rem}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#6c757d}
+.ldot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.dow-header{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px}
+.dow-cell{text-align:center;font-size:11px;font-weight:500;color:#adb5bd;padding:4px 0;letter-spacing:.03em}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.day-cell{background:#fff;border:0.5px solid #e9ecef;border-radius:7px;min-height:110px;padding:6px 5px 5px;overflow:hidden}
+.day-cell.empty{background:#f8f9fa;border-color:transparent;min-height:110px}
+.day-num{font-size:11px;font-weight:600;color:#adb5bd;margin-bottom:4px;padding:0 1px}
+.post-chip{border-radius:4px;padding:4px 5px;margin-bottom:3px;border-left:2px solid transparent;cursor:pointer;transition:opacity .1s;display:block;width:100%}
+.post-chip:hover{opacity:.78}
+.post-chip.hidden{display:none}
+.chip-label{font-size:9px;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.chip-plat{font-size:9px;opacity:.7;line-height:1.2;margin-top:1px;display:block}
+
+/* drawer overlay */
+.drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:200}
+.drawer-overlay.open{display:block}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:340px;background:#fff;border-left:0.5px solid #dee2e6;z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s ease}
+.drawer.open{transform:translateX(0)}
+.drawer-head{padding:16px 18px 12px;border-bottom:0.5px solid #f1f3f5;display:flex;align-items:flex-start;gap:10px}
+.drawer-date{font-size:13px;font-weight:600;color:#212529;flex:1}
+.drawer-count{font-size:11px;color:#6c757d;margin-top:2px}
+.drawer-close{background:none;border:none;font-size:20px;color:#adb5bd;cursor:pointer;line-height:1;padding:0;flex-shrink:0}
+.drawer-close:hover{color:#212529}
+.drawer-body{flex:1;overflow-y:auto;padding:12px 18px}
+.post-block{border:0.5px solid #e9ecef;border-radius:8px;padding:12px;margin-bottom:10px}
+.post-block:last-child{margin-bottom:0}
+.pb-header{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.pb-bucket{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px}
+.pb-plat{font-size:11px;color:#6c757d}
+.pb-row{display:flex;gap:6px;margin-bottom:5px;align-items:baseline}
+.pb-label{font-size:10px;font-weight:600;color:#adb5bd;min-width:52px;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0}
+.pb-val{font-size:12px;color:#212529;line-height:1.45}
+.pb-cta{font-size:11px;font-style:italic;color:#495057;background:#f8f9fa;border-radius:4px;padding:5px 8px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="cal-wrap">
+  <h2>Main Street West Branch — Calendar View</h2>
+  <p class="subtitle">May 2026 – May 2027 &nbsp;|&nbsp; Click any post chip to see details</p>
+
+  <div class="month-pills" id="monthPills"></div>
+
+  <div class="nav-row">
+    <button class="nav-btn" onclick="changeMonth(-1)">&#8592; Prev</button>
+    <div class="month-title" id="monthTitle"></div>
+    <button class="nav-btn" onclick="changeMonth(1)">Next &#8594;</button>
+  </div>
+  <div class="month-theme" id="monthTheme"></div>
+  <div class="events-bar" id="eventsBar"></div>
+
+  <div class="controls">
+    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('ig',this)">📸 Instagram</button>
+    <button class="filter-btn" onclick="setFilter('fb',this)">👥 Facebook</button>
+    <button class="filter-btn" onclick="setFilter('both',this)">📸+👥 Both</button>
+    <button class="filter-btn" onclick="setFilter('email',this)">✉️ Email</button>
+    <button class="filter-btn" onclick="setFilter('Events',this)" style="border-left:2px solid #2D6A4F">Events</button>
+    <button class="filter-btn" onclick="setFilter('Mission',this)" style="border-left:2px solid #7D6608">Mission</button>
+    <button class="filter-btn" onclick="setFilter('SmallBiz',this)" style="border-left:2px solid #784212">Small Biz</button>
+    <button class="filter-btn" onclick="setFilter('Sponsor',this)" style="border-left:2px solid #2C3E50">Sponsor</button>
+    <button class="filter-btn" onclick="setFilter('GivingSoc',this)" style="border-left:2px solid #4A235A">Giving Soc</button>
+    <button class="filter-btn" onclick="setFilter('Destination',this)" style="border-left:2px solid #1A3A5C">Destination</button>
+    <button class="filter-btn" onclick="setFilter('Volunteer',this)" style="border-left:2px solid #0E6655">Volunteer</button>
+    <button class="filter-btn" onclick="setFilter('Email',this)" style="border-left:2px solid #495057">Newsletter</button>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="ldot" style="background:#2D6A4F"></div>Events &amp; Promo</div>
+    <div class="legend-item"><div class="ldot" style="background:#7D6608"></div>Mission &amp; Impact</div>
+    <div class="legend-item"><div class="ldot" style="background:#784212"></div>Small Business</div>
+    <div class="legend-item"><div class="ldot" style="background:#2C3E50"></div>Sponsor</div>
+    <div class="legend-item"><div class="ldot" style="background:#4A235A"></div>Giving Society</div>
+    <div class="legend-item"><div class="ldot" style="background:#1A3A5C"></div>Destination Mktg</div>
+    <div class="legend-item"><div class="ldot" style="background:#0E6655"></div>Volunteer</div>
+    <div class="legend-item"><div class="ldot" style="background:#495057"></div>Newsletter</div>
+  </div>
+
+  <div class="dow-header">
+    <div class="dow-cell">Sun</div><div class="dow-cell">Mon</div><div class="dow-cell">Tue</div>
+    <div class="dow-cell">Wed</div><div class="dow-cell">Thu</div><div class="dow-cell">Fri</div>
+    <div class="dow-cell">Sat</div>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+</div>
+
+<!-- slide-in drawer -->
+<div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div>
+      <div class="drawer-date" id="drawerDate"></div>
+      <div class="drawer-count" id="drawerCount"></div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">&#215;</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</div>
+
+<script>
+const BS = {
+  Events:     {bg:'#D8F3DC', color:'#1B4332', label:'Events & Promo'},
+  Mission:    {bg:'#FCF3CF', color:'#7D6608', label:'Mission & Impact'},
+  SmallBiz:   {bg:'#FAE5D3', color:'#784212', label:'Small Business'},
+  Sponsor:    {bg:'#D5D8DC', color:'#2C3E50', label:'Sponsor'},
+  GivingSoc:  {bg:'#E8DAEF', color:'#4A235A', label:'Giving Society'},
+  Destination:{bg:'#D6EAF8', color:'#1A3A5C', label:'Destination Mktg'},
+  Volunteer:  {bg:'#D1F2EB', color:'#0E6655', label:'Volunteer'},
+  Email:      {bg:'#E9ECEF', color:'#495057', label:'Newsletter'},
+};
+const PI = {ig:'📸', fb:'👥', both:'📸+👥', email:'✉️'};
+const PL = {ig:'Instagram', fb:'Facebook', both:'IG + FB', email:'Email'};
+
+const MONTHS = [
+{name:'May 2026',y:2026,m:4,color:'#7D6608',theme:'Spring Launch · Storefront Contest · Hoover Museum Preview',
+events:['Spring Storefront Contest voting open','Hoover Museum re-opening preview begins'],
+posts:[
+{d:4, plat:'both', bucket:'Mission',     type:'Reel + Post',   desc:"Mission Monday: 'What MSWB does for our community' — year in impact stats graphic series", cta:'Learn more at link in bio'},
+{d:5, plat:'fb',   bucket:'Events',      type:'Post',           desc:'Coffee & Collab recap (Apr 27) — photos, key takeaways, next quarter tease', cta:'Join us next quarter!'},
+{d:6, plat:'ig',   bucket:'Destination', type:'Reel',           desc:"Destination: 'Spring has arrived on Main Street' — sidewalk scenes, blooming storefronts", cta:'Plan your visit this weekend'},
+{d:11,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Storefront Contest Spring — voting OPEN, show all entries, encourage community voting, tag businesses', cta:'Vote now — link in bio!'},
+{d:13,plat:'ig',   bucket:'SmallBiz',    type:'Reel',           desc:'Small Business Monday: Vendor/shop owner profile — spring new arrivals or service launch', cta:'Stop in this week'},
+{d:18,plat:'both', bucket:'Sponsor',     type:'Static + Post', desc:'Sponsor Recognition: Feature Sponsor of the Month — their story, their support of MSWB, impact', cta:'Thank you, [Sponsor Name]!'},
+{d:20,plat:'both', bucket:'GivingSoc',   type:'Reel + Post',   desc:'Giving Society Spotlight: Member profile — why they give, what they love about WB, perks callout', cta:'Join the Giving Society today'},
+{d:25,plat:'both', bucket:'Volunteer',   type:'Reel + Post',   desc:'Volunteer Spotlight: Spring volunteer — what they do, why they give their time, upcoming summer needs', cta:'Volunteer with us this summer'},
+{d:27,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:"Summer preview: 'Everything happening this summer' — Summer Kickoff, Hoover Days, Hoover Museum tease", cta:'Save all the dates'},
+{d:29,plat:'email',bucket:'Email',       type:'Newsletter',     desc:'May Newsletter: Spring storefront contest results, summer event preview, volunteer spotlight, Giving Society CTA, sponsor thank-you', cta:'Read online / Forward to a friend'},
+]},
+{name:'June 2026',y:2026,m:5,color:'#2D6A4F',theme:'Summer Kickoff June 12–13 · Hoover Museum Preview',
+events:['Summer Kickoff: June 12–13 (~1,400 attendees)','Summer Storefront Contest launches'],
+posts:[
+{d:1, plat:'both', bucket:'Mission',     type:'Reel + Post',   desc:"Mission Monday: 'Why Summer Kickoff matters' — impact story, what the event does for downtown", cta:'See you June 12-13!'},
+{d:2, plat:'fb',   bucket:'Events',      type:'Event Page',     desc:'Summer Kickoff official FB event — full details, vendors, concert, seltzer stroll', cta:'RSVP + Share with friends!'},
+{d:3, plat:'ig',   bucket:'Events',      type:'Reel',           desc:"Summer Kickoff promo: 'Here's what to expect' — sidewalk sales, seltzer stroll, concert tease", cta:'Mark your calendar — June 12-13!'},
+{d:8, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Summer Kickoff countdown — vendor spotlights, BTS setup, concert tease', cta:'This weekend on Main Street!'},
+{d:9, plat:'ig',   bucket:'SmallBiz',    type:'Reel',           desc:"Small Business Monday: Sidewalk Sales vendor feature — what they're bringing", cta:'Shop the sales June 12-13'},
+{d:12,plat:'both', bucket:'Events',      type:'Reel + Stories',desc:'Summer Kickoff DAY 1 live — sidewalk sales, seltzer stroll energy, crowd shots, vendor interviews', cta:"We're HERE — come join us!"},
+{d:13,plat:'both', bucket:'Events',      type:'Reel + Stories',desc:'Summer Kickoff DAY 2 — free concert coverage, community energy, closing night highlights', cta:'What a weekend!'},
+{d:15,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Summer Kickoff recap: best moments montage, thank-yous to sponsors/volunteers/vendors', cta:'Thank you, West Branch!'},
+{d:16,plat:'both', bucket:'Sponsor',     type:'Static + Post', desc:'Sponsor Recognition: June feature — Summer Kickoff sponsor callout woven in', cta:'Thank you [Sponsor]!'},
+{d:17,plat:'both', bucket:'GivingSoc',   type:'Reel + Post',   desc:"Giving Society: 'Events like Summer Kickoff happen because of YOU' — donor-to-event connection", cta:'Join the Giving Society'},
+{d:18,plat:'ig',   bucket:'Destination', type:'Reel',           desc:"Destination: 'Hoover Presidential Museum reopening this July' — preview + history hook", cta:'Plan your summer visit'},
+{d:22,plat:'both', bucket:'Volunteer',   type:'Reel + Post',   desc:'Volunteer Spotlight: Summer Kickoff volunteer hero — BTS, setup/breakdown, why they show up', cta:'Volunteer with us this summer'},
+{d:24,plat:'email',bucket:'Email',       type:'Newsletter',     desc:'June Newsletter: Summer Kickoff recap + photos, Hoover Museum preview, summer storefront contest launch, Giving Society, volunteer CTA', cta:'Forward to a friend'},
+]},
+{name:'July 2026',y:2026,m:6,color:'#7B241C',theme:'4th of July · Hoover Museum Re-Opening · Destination Push',
+events:['4th of July / Patriotic Storefront Contest','Hoover Museum Re-Opening (exact date TBD)','Coffee & Collab: Jul 27'],
+posts:[
+{d:1, plat:'both', bucket:'Mission',     type:'Reel + Post',   desc:"Mission Monday: 'Historic West Branch — why we protect this community' — Hoover Museum + heritage", cta:'Explore our history'},
+{d:2, plat:'fb',   bucket:'Events',      type:'Event Page',     desc:'4th of July Patriotic Storefront Contest promo — community voting, business participation', cta:'Vote for your favorite!'},
+{d:3, plat:'both', bucket:'Destination', type:'Reel + Post',   desc:"Destination: 'Celebrate 4th of July in Historic West Branch' — parade, downtown, Hoover Museum", cta:'Plan your holiday weekend'},
+{d:4, plat:'both', bucket:'Events',      type:'Reel + Stories',desc:'4th of July LIVE — parade, patriotic storefronts, community energy downtown', cta:'Happy Independence Day!'},
+{d:6, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:"Hoover Museum Re-Opening FEATURE — 'It's OPEN! Visit Historic West Branch'", cta:'Plan your visit today'},
+{d:8, plat:'ig',   bucket:'SmallBiz',    type:'Reel',           desc:'Small Business Monday: Summer feature — downtown shop/café paired with Hoover Museum visit angle', cta:'Eat. Shop. Explore. Exit 254.'},
+{d:13,plat:'both', bucket:'Sponsor',     type:'Static + Post', desc:'Sponsor Recognition: July feature sponsor — tie to summer energy/events', cta:'Thank you [Sponsor]!'},
+{d:15,plat:'both', bucket:'GivingSoc',   type:'Reel + Post',   desc:"Giving Society: 'Your support powers a destination' — Hoover Museum + tourism impact", cta:'Join the Giving Society'},
+{d:16,plat:'both', bucket:'Destination', type:'Reel + Post',   desc:"Destination: 'Your summer West Branch itinerary' — Hoover Museum + Main Street walkthrough", cta:'Save this itinerary'},
+{d:22,plat:'both', bucket:'Volunteer',   type:'Reel + Post',   desc:'Volunteer Spotlight: Summer volunteer feature — ongoing summer needs highlighted', cta:'We need YOUR help this fall'},
+{d:24,plat:'email',bucket:'Email',       type:'Newsletter',     desc:'July Newsletter: 4th recap + Patriotic contest results, Hoover Museum NOW OPEN, summer destination guide, Hoover Days preview', cta:'Forward to a friend'},
+{d:27,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Coffee & Collaboration (Jul 27) — what it is, who should come, networking culture of MSWB', cta:'Join us Monday!'},
+]},
+{name:'August 2026',y:2026,m:7,color:'#784212',theme:"Hoover's Hometown Days Aug 7–8 · Back to School",
+events:["Hoover's Hometown Days: Aug 7–8 (~4,500 attendees)",'Back to School push','Fall event season preview'],
+posts:[
+{d:3, plat:'both', bucket:'Mission',     type:'Reel + Post',   desc:"Mission Monday: 'Hoover's Hometown Days — what it means to West Branch' — history, community pride", cta:'See you August 7-8!'},
+{d:4, plat:'fb',   bucket:'Events',      type:'Event Page',     desc:"Hoover's Hometown Days FB event — full details, vendor map, family activities, food trucks on Main St", cta:'RSVP + Share!'},
+{d:5, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:"Hoover Days countdown: 'Everything on Main Street this weekend' — food trucks, vendors, family fun preview", cta:'Mark your calendar!'},
+{d:7, plat:'both', bucket:'Events',      type:'Reel + Stories',desc:'Hoover Days DAY 1 LIVE — food trucks, Main St vendors, crowd energy, family moments', cta:"We're HERE — come celebrate!"},
+{d:8, plat:'both', bucket:'Events',      type:'Reel + Stories',desc:'Hoover Days DAY 2 LIVE — continued coverage, vendor interviews, community spirit', cta:'Day 2 is LIVE on Main Street!'},
+{d:10,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Hoover Days RECAP — best moments montage, attendance shoutout, sponsor + vendor thank-yous', cta:'Thank you for an incredible weekend!'},
+{d:11,plat:'both', bucket:'Sponsor',     type:'Static + Post', desc:'Sponsor Recognition: August feature — Hoover Days sponsor callout + visibility', cta:'Thank you [Sponsor]!'},
+{d:12,plat:'ig',   bucket:'SmallBiz',    type:'Reel',           desc:'Small Business Monday: Back-to-school local shopping guide — 3 downtown shops for school season', cta:'Shop local this school year'},
+{d:17,plat:'both', bucket:'GivingSoc',   type:'Reel + Post',   desc:"Giving Society: 'Events like Hoover Days are possible because of our Giving Society' — impact connection", cta:'Join today'},
+{d:18,plat:'both', bucket:'Destination', type:'Reel + Post',   desc:"Destination: 'Fall is coming to Main Street' — preview of fall events, seasonal charm", cta:'Plan your fall visit'},
+{d:24,plat:'both', bucket:'Volunteer',   type:'Reel + Post',   desc:'Volunteer Spotlight + Fall Recruitment: Summer volunteer + preview fall volunteer needs (Scarecrow, Fall Fest)', cta:'Sign up to volunteer this fall'},
+{d:26,plat:'email',bucket:'Email',       type:'Newsletter',     desc:'August Newsletter: Hoover Days recap + photos, back to school, fall event preview, Giving Society, volunteer ask', cta:'Forward to a friend'},
+]},
+{name:'September 2026',y:2026,m:8,color:'#4A235A',theme:'Fall Season Launch · Scarecrow Contest Opens',
+events:['Fall Scarecrow Contest opens (all of October)','Fall Fest countdown: Oct 9–10','Small Business Saturday planning begins'],
+posts:[
+{d:7, plat:'both', bucket:'Mission',     type:'Reel + Post',   desc:"Mission Monday: 'Why fall in downtown West Branch is unlike anywhere else' — seasonal storytelling, heritage", cta:'Come experience it yourself'},
+{d:9, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:"Fall Season Preview: 'Everything happening this fall' — Scarecrow Contest, Fall Fest, Trick-or-Treat, LNO, SBS", cta:'Save all the dates!'},
+{d:14,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Scarecrow Contest LAUNCH — businesses can enter, community can vote, how to participate', cta:'Enter your business OR vote for your fave!'},
+{d:15,plat:'both', bucket:'Sponsor',     type:'Static + Post', desc:'Sponsor Recognition: September feature sponsor', cta:'Thank you [Sponsor]!'},
+{d:16,plat:'ig',   bucket:'SmallBiz',    type:'Reel',           desc:'Small Business Monday: Fall product/service launch from a downtown business — seasonal special, new inventory', cta:'Stop by this fall'},
+{d:21,plat:'both', bucket:'GivingSoc',   type:'Reel + Post',   desc:"Giving Society Spotlight: Fall member — 'what your membership funds this season'", cta:'Join before year-end'},
+{d:22,plat:'both', bucket:'Destination', type:'Reel + Post',   desc:"Destination: 'Your fall West Branch itinerary' — apple cider, fall storefronts, Hoover Museum", cta:'Save this fall guide'},
+{d:28,plat:'both', bucket:'Volunteer',   type:'Reel + Post',   desc:'Volunteer Spotlight + Recruitment: Returning volunteer + open call for Fall Fest and Trick-or-Treat', cta:'Sign up now — spots filling fast!'},
+{d:30,plat:'email',bucket:'Email',       type:'Newsletter',     desc:'September Newsletter: Fall event lineup, Scarecrow Contest OPEN, Fall Fest countdown, LNO promo, Giving Society, volunteer ask', cta:'Forward to a friend'},
+]},
+{name:'October 2026',y:2026,m:9,color:'#784212',theme:'Fall Fest Oct 9–10 · Scarecrow Contest · Trick-or-Treat Oct 31',
+events:['Fall Fest: Oct 9–10 (~800 attendees)','Scarecrow Contest voting all month','Trick-or-Treat on Main Street: Oct 31 (~1,800 attendees)','Coffee & Collab: Oct 26'],
+posts:[
+{d:4, plat:'fb',   bucket:'Events',      type:'Event Page',     desc:"Fall Fest FB event — Whitney's Wings partnership, pumpkin patch party, bounce houses, outdoor movie details", cta:'RSVP + Share with families!'},
+{d:5, plat:'both', bucket:'Mission',     type:'Reel + Post',   desc:"Mission Monday: 'Fall Fest — what makes it special' — community gathering, free family fun", cta:'See you October 9-10!'},
+{d:7, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Fall Fest countdown + Scarecrow Contest voting reminder — community roundup of entries so far', cta:'Vote + Come to Fall Fest this weekend!'},
+{d:9, plat:'both', bucket:'Events',      type:'Reel + Stories',desc:'Fall Fest DAY 1 LIVE — sidewalk sales, pumpkin patch party, kids activities', cta:"We're HERE!"},
+{d:10,plat:'both', bucket:'Events',      type:'Reel + Stories',desc:'Fall Fest DAY 2 — outdoor movie in the National Park, family moments, closing night', cta:'Movies in the park tonight!'},
+{d:12,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Fall Fest RECAP — best moments, thank-yous, Scarecrow Contest reminder to keep voting', cta:'Thank you for a wonderful fall weekend!'},
+{d:13,plat:'both', bucket:'Sponsor',     type:'Static + Post', desc:'Sponsor Recognition: October feature + Fall Fest sponsor visibility', cta:'Thank you [Sponsor]!'},
+{d:14,plat:'ig',   bucket:'SmallBiz',    type:'Reel',           desc:'Small Business Monday: Halloween/fall product feature — spooky specials, fall decor, seasonal menu items', cta:'Shop spooky local'},
+{d:19,plat:'both', bucket:'GivingSoc',   type:'Reel + Post',   desc:"Giving Society Spotlight: Year-end giving push — 'Fall is the perfect time to join'", cta:'Join before year-end!'},
+{d:20,plat:'both', bucket:'Destination', type:'Reel + Post',   desc:"Destination: 'October in West Branch — fall colors, historic district, family fun'", cta:'Bring the whole family!'},
+{d:26,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Coffee & Collaboration (Oct 26) + Trick-or-Treat countdown — both this week!', cta:'Join us Monday + Trick-or-Treat Oct 31!'},
+{d:27,plat:'both', bucket:'Volunteer',   type:'Reel + Post',   desc:'Volunteer Spotlight: Trick-or-Treat volunteer feature + Scarecrow judging volunteer call', cta:'Volunteer Halloween night!'},
+{d:31,plat:'both', bucket:'Events',      type:'Reel + Stories',desc:'Trick-or-Treat on Main Street LIVE — costumes, candy, community fun (~1,800 attendees)', cta:'Happy Halloween from Main Street!'},
+{d:31,plat:'email',bucket:'Email',       type:'Newsletter',     desc:'October Newsletter: Fall Fest recap, Scarecrow winner reveal, Trick-or-Treat TONIGHT, LNO promo, holiday season preview', cta:'Forward to a friend'},
+]},
+{name:'November 2026',y:2026,m:10,color:'#1B4332',theme:'Ladies Night Out Nov 4 · Small Business Saturday Nov 28',
+events:['Ladies Night Out Holiday: Nov 4 (~500 attendees)','Small Business Saturday: Nov 28','Holiday Elf Hunt promo begins'],
+posts:[
+{d:2, plat:'both', bucket:'Mission',     type:'Reel + Post',   desc:"Mission Monday: 'Why shopping small this November changes everything' — economic impact, holiday buying local", cta:'Shop local this holiday season'},
+{d:3, plat:'fb',   bucket:'Events',      type:'Event Page',     desc:'Ladies Night Out Holiday (Nov 4) event listing — vendors, activities, what to expect', cta:'RSVP + Bring a friend!'},
+{d:4, plat:'both', bucket:'Events',      type:'Reel + Stories',desc:'Ladies Night Out Holiday LIVE — vendor market energy, community women, fun atmosphere', cta:'Tonight on Main Street!'},
+{d:5, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Ladies Night Out RECAP — highlights, thank-you to vendors + attendees, photos, spring edition tease', cta:'Thank you for a magical evening!'},
+{d:9, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:"Small Business Saturday countdown — 3 weeks out — 'Start your holiday list now'", cta:'Save the date: Nov 28!'},
+{d:10,plat:'both', bucket:'Sponsor',     type:'Static + Post', desc:'Sponsor Recognition: November feature + holiday season thank-you', cta:'Thank you [Sponsor]!'},
+{d:11,plat:'ig',   bucket:'SmallBiz',    type:'Reel',           desc:'Small Business Monday: Holiday gift guide from 3 downtown shops — what to expect on Small Biz Saturday', cta:'Shop local for the holidays'},
+{d:16,plat:'both', bucket:'GivingSoc',   type:'Reel + Post',   desc:"Giving Society: Year-end giving push — 'Join before December 31' — member story, perks, impact", cta:'Make a year-end gift today'},
+{d:17,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:"SBS promo Reel: vendor interviews, 'what are you bringing?' — countdown to Nov 28", cta:'1 week to Small Biz Saturday!'},
+{d:18,plat:'both', bucket:'Destination', type:'Reel + Post',   desc:"Destination: 'Your holiday shopping destination — Main Street West Branch'", cta:'Come make memories'},
+{d:23,plat:'both', bucket:'Events',      type:'Static + Post', desc:'Thanksgiving gratitude — thank community, vendors, volunteers, sponsors, Giving Society members', cta:"We're grateful for YOU"},
+{d:25,plat:'both', bucket:'Volunteer',   type:'Reel + Post',   desc:'Volunteer Spotlight: SBS volunteer hero + Christmas Past volunteer recruitment', cta:'Help make the holidays magical'},
+{d:28,plat:'both', bucket:'Events',      type:'Reel + Stories',desc:"Small Business Saturday LIVE — shop-along energy, vendor interviews, community holiday spirit", cta:"We're OPEN — come shop!"},
+{d:28,plat:'email',bucket:'Email',       type:'Newsletter',     desc:'November Newsletter: LNO recap, SBS is TODAY, A Christmas Past preview, Holiday Elf Hunt launch, year-end Giving Society push', cta:'Forward to a friend'},
+]},
+{name:'December 2026',y:2026,m:11,color:'#17202A',theme:'A Christmas Past Dec 4–5 · Giving Tuesday Dec 1 · Holiday Elf Hunt',
+events:['Giving Tuesday: Dec 1','A Christmas Past: Dec 4–5 (~3,500 attendees)','Holiday Elf Hunt all month'],
+posts:[
+{d:1, plat:'both', bucket:'Mission',     type:'Reel + Post',   desc:"Giving Tuesday: 'MSWB year in impact' — attendees, economic impact, businesses supported, donation ask", cta:'Give today — link in bio'},
+{d:2, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:"A Christmas Past promo: 'Step back in time in Historic West Branch' — what to expect, holiday atmosphere", cta:'This weekend — Dec 4-5!'},
+{d:3, plat:'fb',   bucket:'Events',      type:'Event Page',     desc:"A Christmas Past FB event — full weekend details, holiday market, carriage rides, period dress", cta:'RSVP + Share the magic!'},
+{d:4, plat:'both', bucket:'Events',      type:'Reel + Stories',desc:'A Christmas Past DAY 1 LIVE — holiday market, period dress, carriage rides, downtown transformation', cta:'The magic is HERE!'},
+{d:5, plat:'both', bucket:'Events',      type:'Reel + Stories',desc:'A Christmas Past DAY 2 — final day highlights, family moments, closing weekend energy', cta:'Last chance for the holiday magic!'},
+{d:7, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'A Christmas Past RECAP — best moments, attendance shoutout, thank-yous to sponsors/volunteers/vendors', cta:'Thank you for making the magic!'},
+{d:8, plat:'both', bucket:'Sponsor',     type:'Static + Post', desc:'Sponsor Recognition: December — annual sponsor appreciation, year-end visibility', cta:'Thank you [Sponsor]!'},
+{d:9, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Holiday Elf Hunt is ON — how to play, where to find elves, tag us in your finds!', cta:'Find all the elves!'},
+{d:10,plat:'ig',   bucket:'SmallBiz',    type:'Reel',           desc:'Small Business Monday: Holiday gift guide — last-minute local shopping, 3 businesses featured', cta:'Shop local through Dec 24!'},
+{d:14,plat:'both', bucket:'GivingSoc',   type:'Reel + Post',   desc:"Giving Society: Year-end FINAL push — 'Join by Dec 31 for 2027 membership'", cta:'Last chance to join this year!'},
+{d:15,plat:'both', bucket:'Destination', type:'Reel + Post',   desc:"'Christmas in Historic West Branch' destination Reel — holiday lights, storefronts, Hoover Museum winter look", cta:'Visit before Christmas'},
+{d:21,plat:'both', bucket:'Volunteer',   type:'Reel + Post',   desc:"Volunteer Year-End Appreciation: 'Our 2026 volunteers made it all possible' — team shoutout, year in volunteer impact", cta:'You made 2026 magical. Thank you!'},
+{d:23,plat:'both', bucket:'Events',      type:'Static + Post', desc:'Christmas wishes from MSWB + Holiday Elf Hunt final days reminder', cta:'Merry Christmas from Main Street!'},
+{d:28,plat:'email',bucket:'Email',       type:'Newsletter',     desc:'December Newsletter: A Christmas Past recap, Elf Hunt highlights, year-end giving thank-you, 2027 preview', cta:'Forward to a friend'},
+]},
+{name:'January 2027',y:2027,m:0,color:'#1A3A5C',theme:'New Year · 2026 Impact Recap · Evening of Honors Preview',
+events:['Coffee & Collaboration: Jan 26','Evening of Honors nominations open','2027 Giving Society launch'],
+posts:[
+{d:5, plat:'both', bucket:'Mission',     type:'Reel + Post',   desc:"Mission Monday: '2026 Year in Impact' — attendees, economic data, businesses supported, sponsors thanked", cta:"Here's what YOU helped build"},
+{d:7, plat:'both', bucket:'GivingSoc',   type:'Reel + Post',   desc:"Giving Society 2027 Launch: 'New year, new opportunity to invest in West Branch' — 2027 membership open", cta:'Join the 2027 Giving Society!'},
+{d:12,plat:'both', bucket:'Destination', type:'Reel + Post',   desc:"Destination: 'Winter on Main Street — a cozy guide to West Branch in January'", cta:'Visit us this winter'},
+{d:13,plat:'both', bucket:'Sponsor',     type:'Static + Post', desc:'Sponsor Recognition: January — 2027 annual sponsor intro/welcome', cta:'Thank you, [Sponsor]!'},
+{d:14,plat:'ig',   bucket:'SmallBiz',    type:'Reel',           desc:"Small Business Monday: New year new products — a downtown business's January refresh or new launch", cta:'Start your year shopping local'},
+{d:19,plat:'both', bucket:'GivingSoc',   type:'Reel + Post',   desc:'Giving Society Spotlight: January member feature + 2027 membership push', cta:"It's not too late to join!"},
+{d:21,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:"Evening of Honors preview: 'Save the date — nominations open' — what the event celebrates, how to nominate", cta:'Nominate a community champion!'},
+{d:26,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Coffee & Collaboration (Jan 26) — event promo + recap photos afterward', cta:'Join us Monday!'},
+{d:28,plat:'both', bucket:'Volunteer',   type:'Reel + Post',   desc:'Volunteer Spotlight: Returning volunteer who started last year — new year recruitment angle', cta:'Start 2027 as a volunteer!'},
+{d:30,plat:'email',bucket:'Email',       type:'Newsletter',     desc:'January Newsletter: 2026 year-in-review, Evening of Honors nominations open, Giving Society 2027 push, spring preview, Coffee & Collab recap', cta:'Forward to a friend'},
+]},
+{name:'February 2027',y:2027,m:1,color:'#7B241C',theme:"Evening of Honors (late Feb) · Valentine's Day · Love Local",
+events:["Evening of Honors: late Feb (date TBD — confirm with Jessi)","Valentine's Day Love Local campaign",'Sweets for Success promo begins'],
+posts:[
+{d:1, plat:'both', bucket:'Mission',     type:'Reel + Post',   desc:"Mission Monday: 'The people behind Main Street' — Evening of Honors preview storytelling", cta:'Nominations close soon!'},
+{d:2, plat:'fb',   bucket:'Events',      type:'Event Page',     desc:'Evening of Honors FB event — RSVP, ticket info, what to expect, award categories', cta:'Join us for an evening of celebration!'},
+{d:4, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:"Valentine's 'Love Local' launch: 'Give the gift of West Branch this Valentine's Day'", cta:'Shop Main Street for your Valentine'},
+{d:9, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:"Evening of Honors countdown + Valentine's shopping push", cta:'This week: Love Local!'},
+{d:10,plat:'both', bucket:'Sponsor',     type:'Static + Post', desc:'Sponsor Recognition: February + Evening of Honors sponsor shoutout', cta:'Thank you [Sponsor]!'},
+{d:11,plat:'ig',   bucket:'SmallBiz',    type:'Reel',           desc:"Small Business Monday: Valentine's gift guide from 3 downtown businesses", cta:'Shop local for love'},
+{d:14,plat:'both', bucket:'Events',      type:'Static + Post', desc:"Valentine's Day: 'We love West Branch' — collage of businesses, volunteers, community members", cta:'#LoveWestBranch'},
+{d:16,plat:'both', bucket:'GivingSoc',   type:'Reel + Post',   desc:"Giving Society Spotlight: February member — 'why they chose to invest in their community'", cta:'Join the Giving Society'},
+{d:18,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Evening of Honors: Day-of coverage — awards, honorees, community celebration, formal atmosphere', cta:'An evening to remember'},
+{d:20,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Evening of Honors RECAP — award winners featured, honoree stories, community pride', cta:'Congratulations to our 2027 honorees!'},
+{d:23,plat:'both', bucket:'Volunteer',   type:'Reel + Post',   desc:'Volunteer Spotlight: Evening of Honors volunteer + spring volunteer recruitment begins', cta:'Volunteer with us this spring'},
+{d:25,plat:'both', bucket:'Destination', type:'Reel + Post',   desc:"Destination: 'Late winter in West Branch — the town you should be visiting'", cta:'Plan your spring trip'},
+{d:27,plat:'email',bucket:'Email',       type:'Newsletter',     desc:"February Newsletter: Evening of Honors recap + honorees, Valentine's Love Local recap, Sweets for Success preview, spring events", cta:'Forward to a friend'},
+]},
+{name:'March 2027',y:2027,m:2,color:'#0E6655',theme:'Sweets for Success Promo · Ladies Night Out Spring · Spring Storefront Contest',
+events:['Ladies Night Out Spring: March (date TBD — confirm with Jessi)','Sweets for Success April countdown','Spring Storefront Contest launch'],
+posts:[
+{d:1, plat:'both', bucket:'Mission',     type:'Reel + Post',   desc:"Mission Monday: 'Sweets for Success — why MSWB's biggest fundraiser matters' — what the funds do", cta:'Tickets on sale now!'},
+{d:2, plat:'fb',   bucket:'Events',      type:'Event Page',     desc:'Sweets for Success early listing — April date, ticket info, auction preview', cta:'Get your tickets!'},
+{d:3, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:"Ladies Night Out Spring promo: 'A night out for the women of West Branch' — vendors, atmosphere", cta:'RSVP — spots are limited!'},
+{d:8, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Spring Storefront Contest LAUNCH — businesses invited to participate, community can vote', cta:'Enter your business OR vote!'},
+{d:9, plat:'both', bucket:'Sponsor',     type:'Static + Post', desc:'Sponsor Recognition: March + Sweets for Success sponsor preview', cta:'Thank you [Sponsor]!'},
+{d:10,plat:'ig',   bucket:'SmallBiz',    type:'Reel',           desc:"Small Business Monday: Spring refresh — a downtown business's seasonal launch, new products, spring menu", cta:'Spring shopping starts here'},
+{d:14,plat:'both', bucket:'GivingSoc',   type:'Reel + Post',   desc:"Giving Society: 'Sweets for Success + Giving Society — two ways to invest in WB'", cta:'Join the Giving Society'},
+{d:15,plat:'both', bucket:'Events',      type:'Reel + Stories',desc:'Ladies Night Out Spring LIVE — vendor market, community energy, women of WB', cta:"Tonight's the night!"},
+{d:17,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Ladies Night Out RECAP + Sweets for Success countdown (3 weeks out from April date)', cta:'Thank you! Next up: Sweets for Success'},
+{d:18,plat:'both', bucket:'Destination', type:'Reel + Post',   desc:"Destination: 'Spring is finally here in West Branch' — blooming downtown, sidewalk scenes", cta:'Come explore this spring'},
+{d:24,plat:'both', bucket:'Volunteer',   type:'Reel + Post',   desc:'Volunteer Spotlight: Spring volunteer + Sweets for Success volunteer/committee recruitment', cta:'Help make our biggest event a success'},
+{d:28,plat:'email',bucket:'Email',       type:'Newsletter',     desc:'March Newsletter: LNO recap, Sweets for Success COUNTDOWN, spring storefront contest is open, Giving Society, spring event calendar', cta:'Forward to a friend'},
+]},
+{name:'April 2027',y:2027,m:3,color:'#2D6A4F',theme:'Sweets for Success April 10 · Spring Storefront Winner · Coffee & Collab Apr 27',
+events:['Sweets for Success: April 10 (confirm date)','Spring Storefront Contest winner reveal','Coffee & Collaboration: April 27'],
+posts:[
+{d:5, plat:'both', bucket:'Mission',     type:'Reel + Post',   desc:"Mission Monday: 'Sweets for Success week — the fundraiser that keeps West Branch thriving'", cta:'Get your tickets — this Friday!'},
+{d:6, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Sweets for Success final countdown — dessert auction preview, donor/bidder excitement, sponsor callouts', cta:'Tickets at the door + online!'},
+{d:7, plat:'ig',   bucket:'SmallBiz',    type:'Reel',           desc:"Small Business Monday: 'Shop Main Street in April' — spring product, Earth Month local angle", cta:'Shop local this spring'},
+{d:10,plat:'both', bucket:'Events',      type:'Reel + Stories',desc:"Sweets for Success EVENT DAY — live auction energy, dessert photos, dressed-up community, bids!", cta:'The bids are flying!'},
+{d:12,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Sweets for Success RECAP — funds raised callout, winning bids, sponsor/donor/baker/volunteer thank-yous', cta:'Thank you for making it our best year yet!'},
+{d:13,plat:'both', bucket:'Sponsor',     type:'Static + Post', desc:'Sponsor Recognition: April + Sweets for Success sponsor thank-you visibility', cta:'Thank you [Sponsor]!'},
+{d:19,plat:'both', bucket:'GivingSoc',   type:'Reel + Post',   desc:"Giving Society: 'Sweets for Success raised $X — your Giving Society membership raises that bar year-round'", cta:'Join the Giving Society today'},
+{d:20,plat:'both', bucket:'Destination', type:'Reel + Post',   desc:"Destination: 'Spring in West Branch — the perfect day trip' — Hoover Museum + Main Street spring blooms", cta:'Plan your spring visit'},
+{d:21,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Spring Storefront Contest WINNER reveal — congrats, photo feature, thank businesses for participating', cta:'Congratulations!'},
+{d:26,plat:'both', bucket:'Volunteer',   type:'Reel + Post',   desc:'Volunteer Spotlight: Spring volunteer + Summer Kickoff volunteer recruitment begins', cta:'Help us kick off summer!'},
+{d:27,plat:'both', bucket:'Events',      type:'Reel + Post',   desc:'Coffee & Collaboration (Apr 27) promo + recap — business networking, Q2 energy', cta:'Join us for Coffee & Collab!'},
+{d:30,plat:'email',bucket:'Email',       type:'Newsletter',     desc:'April Newsletter: Sweets for Success RECAP + funds raised, spring contest winner, summer event preview, Coffee & Collab recap', cta:'Forward to a friend'},
+]},
+{name:'May 2027',y:2027,m:4,color:'#7D6608',theme:"Year Wrap · Summer Kickoff Preview · Mother's Day · Memorial Day",
+events:["Mother's Day: May 11",'Summer Kickoff countdown (June 2027)','Memorial Day Weekend'],
+posts:[
+{d:4, plat:'both', bucket:'Mission',     type:'Reel + Post',   desc:"Mission Monday: 'One year of strategic communications — here's what we built together' — year in review, gratitude", cta:'Thank you for following along'},
+{d:6, plat:'both', bucket:'Events',      type:'Reel + Post',   desc:"Mother's Day shopping guide: 'The best gifts are local' — 3 downtown businesses featured", cta:'Shop Main Street for Mom'},
+{d:11,plat:'both', bucket:'Events',      type:'Static + Post', desc:"Mother's Day: 'To the moms who make West Branch great' — community appreciation post", cta:'#LoveWestBranch Moms'},
+{d:12,plat:'both', bucket:'Sponsor',     type:'Static + Post', desc:"Sponsor Recognition: May 2027 feature — annual sponsor appreciation", cta:'Thank you [Sponsor]!'},
+{d:13,plat:'ig',   bucket:'SmallBiz',    type:'Reel',           desc:'Small Business Monday: Spring/summer launch feature from a downtown business', cta:'Shop local this May'},
+{d:18,plat:'both', bucket:'GivingSoc',   type:'Reel + Post',   desc:"Giving Society Spotlight: Spring member — 'why I invest in Main Street year after year'", cta:'Join the Giving Society'},
+{d:19,plat:'both', bucket:'Destination', type:'Reel + Post',   desc:"Destination: 'Everything happening this summer' — Summer Kickoff, Hoover Days, Hoover Museum — full summer preview", cta:'Save all the dates!'},
+{d:25,plat:'both', bucket:'Volunteer',   type:'Reel + Post',   desc:'Volunteer Spotlight: Reflecting on 2026-27 season + summer recruitment for Summer Kickoff', cta:'Volunteer this summer!'},
+{d:26,plat:'both', bucket:'Events',      type:'Static + Post', desc:"Memorial Day Weekend: 'Main Street is open — come celebrate' — patriotic vibes, local businesses open", cta:'Support local this weekend'},
+{d:30,plat:'email',bucket:'Email',       type:'Newsletter',     desc:'May 2027 Newsletter: Year-in-review highlights, summer event calendar preview, Summer Kickoff details, Giving Society 2027-28 push', cta:'Forward to a friend'},
+]},
+];
+let curIdx=0, curFilter='all';
+const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function setFilter(f,btn){
+  curFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCal();
+}
+function changeMonth(d){
+  curIdx=Math.max(0,Math.min(MONTHS.length-1,curIdx+d));
+  buildPills(); renderCal();
+}
+function buildPills(){
+  const c=document.getElementById('monthPills'); c.innerHTML='';
+  MONTHS.forEach((m,i)=>{
+    const b=document.createElement('button');
+    b.className='mpill'+(i===curIdx?' active':'');
+    b.textContent=m.name;
+    b.onclick=()=>{curIdx=i;buildPills();renderCal();};
+    c.appendChild(b);
+  });
+}
+function matches(p){
+  if(curFilter==='all') return true;
+  if(curFilter==='ig') return p.plat==='ig'||p.plat==='both';
+  if(curFilter==='fb') return p.plat==='fb'||p.plat==='both';
+  if(curFilter==='both') return p.plat==='both';
+  if(curFilter==='email') return p.plat==='email';
+  return p.bucket===curFilter;
+}
+function openDrawer(day, posts){
+  const md=MONTHS[curIdx];
+  const dow=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const d=new Date(md.y,md.m,day);
+  document.getElementById('drawerDate').textContent=dow[d.getDay()]+', '+MN[md.m]+' '+day+', '+md.y;
+  document.getElementById('drawerCount').textContent=posts.length+' scheduled post'+(posts.length>1?'s':'');
+  document.getElementById('drawerBody').innerHTML=posts.map(p=>{
+    const bs=BS[p.bucket]||{bg:'#eee',color:'#555',label:p.bucket};
+    return `<div class="post-block">
+      <div class="pb-header">
+        <span class="pb-bucket" style="background:${bs.bg};color:${bs.color}">${bs.label}</span>
+        <span class="pb-plat">${PI[p.plat]||''} ${PL[p.plat]||p.plat}</span>
+      </div>
+      <div class="pb-row"><span class="pb-label">Format</span><span class="pb-val">${p.type}</span></div>
+      <div class="pb-row"><span class="pb-label">Content</span><span class="pb-val">${p.desc}</span></div>
+      <div class="pb-cta">CTA: ${p.cta}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+function closeDrawer(){
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+}
+function renderCal(){
+  const md=MONTHS[curIdx];
+  document.getElementById('monthTitle').textContent=md.name;
+  document.getElementById('monthTheme').textContent=md.theme;
+  document.getElementById('eventsBar').innerHTML='<strong>Key events:</strong> '+md.events.join('  &nbsp;&middot;&nbsp;  ');
+  const grid=document.getElementById('calGrid'); grid.innerHTML='';
+  const daysInMonth=new Date(md.y,md.m+1,0).getDate();
+  const firstDow=new Date(md.y,md.m,1).getDay();
+  const byDay={};
+  md.posts.forEach(p=>{if(!byDay[p.d])byDay[p.d]=[];byDay[p.d].push(p);});
+  for(let i=0;i<firstDow;i++){
+    const e=document.createElement('div');e.className='day-cell empty';grid.appendChild(e);
+  }
+  for(let day=1;day<=daysInMonth;day++){
+    const cell=document.createElement('div'); cell.className='day-cell';
+    const numDiv=document.createElement('div'); numDiv.className='day-num'; numDiv.textContent=day;
+    cell.appendChild(numDiv);
+    const posts=byDay[day]||[];
+    posts.forEach(p=>{
+      const bs=BS[p.bucket]||{bg:'#eee',color:'#555',label:p.bucket};
+      const chip=document.createElement('div');
+      chip.className='post-chip'+(matches(p)?'':' hidden');
+      chip.style.background=bs.bg;
+      chip.style.borderLeftColor=bs.color;
+      chip.innerHTML=
+        `<span class="chip-label" style="color:${bs.color}">${bs.label}</span>`+
+        `<span class="chip-plat" style="color:${bs.color}">${PI[p.plat]||''} ${p.type}</span>`;
+      chip.onclick=(e)=>{e.stopPropagation();openDrawer(day,posts);};
+      cell.appendChild(chip);
+    });
+    grid.appendChild(cell);
+  }
+  const total=firstDow+daysInMonth;
+  const rem=(7-(total%7))%7;
+  for(let i=0;i<rem;i++){
+    const e=document.createElement('div');e.className='day-cell empty';grid.appendChild(e);
+  }
+}
+buildPills(); renderCal();
+</script>
+</body></html>
